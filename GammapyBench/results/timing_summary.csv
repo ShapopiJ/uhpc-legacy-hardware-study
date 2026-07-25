@@ -1,0 +1,5 @@
+condition,governor,rdma_ndd,job_id,bench_seconds,fit_mu,fit_sigma
+A,ondemand,active,23703,5244.7,-0.29,1.05
+B,ondemand,inactive,23704,5154.8,-0.29,1.05
+C,performance,active,23705,4947.3,-0.29,1.05
+D,performance,inactive,23706,5008.9,-0.29,1.05

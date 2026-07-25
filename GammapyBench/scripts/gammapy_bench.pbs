@@ -1,0 +1,55 @@
+#!/bin/sh
+#PBS -N GPY_bench
+#PBS -l select=1:ncpus=16:host=sp0-00
+#PBS -l walltime=03:00:00
+#PBS -j oe
+
+# Gammapy production-workload benchmark for the legacy-hardware paper.
+#
+# Runs the real 47 Tuc HESS-combined ring-background analysis (Gammapy 1.3,
+# reading only LOCAL FITS data -- no remote MySQL/France DB, unlike the
+# earlier Model++/ParisAnalysis pipeline) once, timed, under whatever
+# governor/RDMA condition the node is currently set to. The condition label
+# is passed in via  -v COND=A|B|C|D  at submit time and only affects the
+# output directory name and the log line; the actual governor/rdma-ndd state
+# is toggled out-of-band by root before each submission.
+#
+# Cold-cache defence: before the timed run, the entire config data directory
+# (~559 MB, well under the node's 32 GB RAM) is read into the page cache, so
+# every condition is measured warm regardless of run order. This is the
+# specific confound that made the earlier Model++ single-run comparison
+# uninterpretable; preloading removes it.
+
+COND="${COND:-X}"
+DATAPATH="/home/software/hess/data_temp/FITS/47_Tuc/Model_HESSII_Hybrid_Prod10_PreProd6/Model_HESSII_Hybrid_Prod10_PreProd6/ModelPlus_HESS_Combined_Stereo_FaintHiRes"
+BENCHROOT="/home/jshapopi/Projects/GammapyBench"
+WORKDIR="$BENCHROOT/cond_${COND}"
+
+mkdir -p "$WORKDIR"
+cp "$BENCHROOT/AnalysisPA_RingBg.py" "$WORKDIR/AnalysisPA_RingBg.py"
+cd "$WORKDIR" || exit 1
+
+echo "COND=$COND  host=$(hostname)"
+echo "governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)  rdma-ndd=$(systemctl is-active rdma-ndd 2>&1)"
+
+# --- cold-cache defence: pull the 559 MB config dir into page cache ---
+echo "PRELOAD_START $(date -u +%Y-%m-%dT%H:%M:%SZ) $(date +%s.%N)"
+find "$DATAPATH" -type f -exec cat {} + > /dev/null 2>&1
+echo "PRELOAD_END   $(date -u +%Y-%m-%dT%H:%M:%SZ) $(date +%s.%N)"
+
+# --- conda / gammapy env (same as the user's own sub.sh) ---
+__conda_setup="$('/home/software/hess/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+if [ $? -eq 0 ]; then
+    eval "$__conda_setup"
+else
+    . "/home/software/hess/anaconda3/etc/profile.d/conda.sh"
+fi
+unset __conda_setup
+conda activate gammapy-1.1
+
+# --- timed run ---
+echo "BENCH_START $(date -u +%Y-%m-%dT%H:%M:%SZ) $(date +%s.%N)"
+python AnalysisPA_RingBg.py
+RC=$?
+echo "BENCH_END   $(date -u +%Y-%m-%dT%H:%M:%SZ) $(date +%s.%N)"
+echo "python_exit=$RC"

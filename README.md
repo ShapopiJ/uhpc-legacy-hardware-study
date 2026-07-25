@@ -15,10 +15,16 @@ HPC cluster built from repurposed *Ranger* and *Stampede* hardware.
 - **`ThreadPinning/`** — the OpenMP STREAM-Triad benchmark (`stream_triad.c`) and PBS job
   scripts used for the NUMA-locality and thread-pinning-policy results, plus raw CSV results
   and figures.
-- **`ProductionWorkload/`** — the real H.E.S.S. Cen A gamma-ray analysis pipeline (Paris
-  Analysis / ROOT, run in Singularity) job scripts, including `bench_slice0_timed.pbs`, a
-  non-destructive timed variant used to benchmark the same production analysis under different
-  tuning conditions without touching the live results directory.
+- **`ProductionWorkload/`** — the H.E.S.S. Cen A gamma-ray analysis pipeline (Paris Analysis /
+  ROOT, run in Singularity) job scripts, including `bench_slice0_timed.pbs`, a non-destructive
+  timed variant. This pipeline was an initial production-workload candidate but was set aside
+  for the tuning comparison because it queries a remote calibration database (variable network
+  latency); see `GammapyBench/` for the workload actually used.
+- **`GammapyBench/`** — the production-workload benchmark used in the paper: a Gammapy 1.3
+  ring-background analysis of 47 Tucanae (416 H.E.S.S. observations, local FITS data only). The
+  PBS runner (`scripts/gammapy_bench.pbs`) preloads the dataset into the page cache before the
+  timed section so each governor/RDMA condition is measured warm, removing the cold-cache
+  confound. `results/` holds the four per-condition job logs and `timing_summary.csv`.
 
 ## License
 
