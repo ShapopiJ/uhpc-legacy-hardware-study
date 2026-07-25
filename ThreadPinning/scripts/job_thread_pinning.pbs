@@ -1,0 +1,34 @@
+#!/bin/bash
+#PBS -N thread_pinning
+#PBS -q stampede
+#PBS -l select=1:ncpus=16
+#PBS -l walltime=00:30:00
+#PBS -j oe
+
+# Realistic PBS-facing experiment: OpenMP STREAM-Triad bandwidth across
+# thread counts {1,2,4,8,16} on this dual-socket 16-core node, comparing
+# the cluster's current default (no thread affinity enforced -- the
+# pbs_cgroups hook is disabled, see Main.tex discussion) against explicit
+# thread pinning via OMP_PROC_BIND=true / OMP_PLACES=cores.
+
+cd "$PBS_O_WORKDIR"
+BIN=../scripts/stream_triad
+N=200000000
+ITERS=5
+REPS=10
+OUT="thread_pinning_$(date +%Y%m%d_%H%M%S).csv"
+
+echo "host,threads,mode,rep,bandwidth_GBps" > "$OUT"
+
+for threads in 1 2 4 8 16; do
+    for rep in $(seq 1 $REPS); do
+        bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=false "$BIN" $N $ITERS)
+        echo "$(hostname),$threads,unpinned,$rep,$bw" >> "$OUT"
+    done
+    for rep in $(seq 1 $REPS); do
+        bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=true OMP_PLACES=cores "$BIN" $N $ITERS)
+        echo "$(hostname),$threads,pinned,$rep,$bw" >> "$OUT"
+    done
+done
+
+echo "wrote $OUT"

@@ -1,0 +1,421 @@
+#!/bin/sh
+#PBS -N Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list-5
+
+module load singularity/3.11
+unset HPSS
+unset XROOTD
+export NOHPSS="1"
+export NOXROOTD="1"
+export ROOTSYS="/home/software/root/root-6.24.06/install"
+export HESSROOT="/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6"
+export PATH="/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6/scons/local:/home/software/root/root-6.24.06/astro_root-4.1.2/bin:/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6/scons/local:/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6/bin:/home/software/root/root-6.24.06/install/bin:/home/software/hess/anaconda3/envs/py37/bin:/home/software/git/git-2.9.4/install/bin:/home/software/go/1.22.4/gopath/src/github.com/sylabs/singularity-3.11/install/bin:/home/software/go/1.22.4/go/bin:/home/software/gcc/gcc11/install/bin:/home/jshapopi/DAQ/git-subrepo/lib:/home/software/hess/anaconda3/v2025.06/condabin:/home/jshapopi/.local/bin:/opt/ohpc/pub/utils/prun/1.2:/opt/ohpc/pub/utils/autotools/bin:/opt/ohpc/pub/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/opt/pbs/bin"
+export LD_LIBRARY_PATH="/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6/lib:/home/software/root/root-6.24.06/install/lib:/home/software/gcc/gcc11/install/lib64"
+export PYTHONPATH="/home/software/hess/ParisAnalysis/pa-chain-paris-0-10-0-branch_root6/:/home/software/root/root-6.24.06/install/lib"
+module load singularity/3.11
+export SINGULARITYCMD="unam-root"
+export TMPBATCH="/home/jshapopi"
+export CALIB_PATH="/home/jshapopi"
+export SPECTRUM_PATH="/home/software/hess/Tables/HESS_Soft_0-8-34_Prod10_PreProd1_ZenithDependentPSF"
+export DST_PATH="/home/software/hess/data_temp/DST"
+
+export JOBTMPDIR="`mktemp -t -d start_slice_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_5.XXXX`"
+cd $JOBTMPDIR
+
+echo "Script: start_slice_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_5"
+cat > rootlogon.C  << EOF
+{
+// Analysis
+gSystem->Load("librootparisanalysis.so");
+gSystem->Load("librootparisanalysis_scripts.so");
+gSystem->Load("librootparisanalysisCommon_scripts.so");
+// DST
+// Model++ DST
+gSystem->Load("libHessModelStorage.so");
+gSystem->Load("libHessModelGen.so");
+gSystem->Load("libHessModelUtil.so");
+// Reconstruction
+// Model++
+gSystem->Load("librootparisanalysisModel.so");
+gSystem->Load("librootparisanalysisModel_scripts.so");
+}
+EOF
+cat > make_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_sliced.C  << EOF
+void make_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_sliced(unsigned slice_size,unsigned slice)
+{
+//===================
+// = Path 
+set_verbose(true);
+generate_stacktrace(false);
+set_chain_name("Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list");
+//===================
+// = Analysis Setup
+use_model_hessI_analysis();
+set_model_hessI_name("HESSI",2,999);
+set_prefered_reconstruction("ModelHESSI");
+set_combination_strategy(ParisAnalysis::ReconstructionInfo::Combination_Precision);
+//===================
+// = DST Config
+set_dst_type(SashFile::Constants::DST_Model);
+set_dst_version("Model_HESSII_Hybrid_Prod10_PreProd1");
+set_dst_subconfig("DEFAULT");
+//===================
+// = Shape Cuts
+set_chargemin("ModelHESSI",120,Sash::TelescopeConfig::HESS1_960);
+set_nomdistance_range("ModelHESSI",0,0, Sash::TelescopeConfig::HESS1_960);
+set_min_containment("ModelHESSI",0.2,Sash::TelescopeConfig::HESS1_960);
+set_min_pixelsabove5pe("ModelHESSI",5,Sash::TelescopeConfig::HESS1_960);
+set_chargemin("ModelHESSI",120,Sash::TelescopeConfig::HESS1U_960);
+set_nomdistance_range("ModelHESSI",0,0, Sash::TelescopeConfig::HESS1U_960);
+set_min_containment("ModelHESSI",0.2,Sash::TelescopeConfig::HESS1U_960);
+set_min_pixelsabove5pe("ModelHESSI",5,Sash::TelescopeConfig::HESS1U_960);
+//===================
+// = Target 
+set_equatorial();
+set_circular_target("Cen A",201.367,-43.0191,0.1);
+//===================
+// = Run List
+read_asciilist("/home/jshapopi/runlists/Cen_A/Cen_A.list");
+//===================
+// = Regions
+set_excludedregion_size(0.25);
+//===================
+// = Calibration Diagnostics
+fill_likelihood_monitor(1);
+save_likelihood_monitor(0);
+fill_cog_maps(1);
+save_cog_maps(0);
+fill_nsb_maps(1);
+save_nsb_maps(0);
+save_nsb_history(0);
+fill_calib_maps(1);
+save_calib_maps(0);
+save_calib_history(0);
+//===================
+// = Plots 
+set_plots_onoff_folders("event_on","event_off");
+add_plot("MeanScaledShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodnessUnCorrected",150,-5,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledBackgroundGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledPedestalGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessUnCorrected",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledBackgroundGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledPedestalGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessUnCorrected",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledBackgroundGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledPedestalGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessLinearUnCorrected",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledBackgroundGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledPedestalGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessLinearUnCorrected",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledBackgroundGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledPedestalGoodnessLinear",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("PrimaryDepth",60,-2,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("PrimaryDepth",60,-2,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("PrimaryDepth",60,-2,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("AbsoluteEfficiency",50,0,2,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("AbsoluteEfficiency",50,0,2,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToM",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessToMUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFull",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledEvtShiftedShowerGoodnessFullUnCorrected",150,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("NSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("NSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("NSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("UniformNSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("UniformNSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("UniformNSBLikelihood",220,-10,2,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledUniformNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledUniformNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledUniformNSBLikelihood",100,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ConditionNumber",60,0,6,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ConditionNumber",60,0,6,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ConditionNumber",60,0,6,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("NSBGoodness",100,-5,60,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("NSBGoodness",100,-5,60,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("NSBGoodness",100,-5,60,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ShowerNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledNSBGoodness",100,-20,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledNSBGoodness",100,-20,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledNSBGoodness",100,-20,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerNSBGoodness",100,-10,10,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerNSBGoodness",100,-10,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerNSBGoodness",100,-10,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("UniformNSBGoodness",100,0,200,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("UniformNSBGoodness",100,0,200,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("UniformNSBGoodness",100,0,200,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerUniformNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ShowerUniformNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerUniformNSBGoodness",200,0,400,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledUniformNSBGoodness",200,-50,100,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledUniformNSBGoodness",200,-50,100,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledUniformNSBGoodness",200,-50,100,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodness",200,-20,200,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodness",200,-20,200,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodness",200,-20,200,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("NSBGoodnessUnCorr",100,-5,60,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("NSBGoodnessUnCorr",100,-5,60,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("NSBGoodnessUnCorr",100,-5,600,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerNSBGoodnessToM",100,-50,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerNSBGoodnessToM",100,-50,1000,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerNSBGoodnessToM",100,-50,1000,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ShowerNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ShowerUniformNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("ShowerUniformNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerUniformNSBGoodnessFull",100,-50,1000,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerNSBGoodnessToM",100,-20,50,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerNSBGoodnessToM",100,-20,50,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerNSBGoodnessToM",100,-20,50,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerNSBGoodnessFull",200,-20,200,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerNSBGoodnessFull",200,-20,200,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerNSBGoodnessFull",200,-20,200,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodnessFull",200,-20,300,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodnessFull",200,-20,300,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerUniformNSBGoodnessFull",200,-20,300,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("NSBGoodness","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_PreSelected,"","",1);
+add_plot("NSBGoodness","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("NSBGoodness","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_telescope_plot("TelLogCharge","DirectionError",200,1.5,4,100,0,0.2,ParisAnalysis::EventInfo::Event_PreSelected,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","DirectionError",200,1.5,4,100,0,0.2,ParisAnalysis::EventInfo::Event_Classified,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","DirectionError",200,1.5,4,100,0,0.2,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","CoreSq2",200,1.5,4,50,0,100000,ParisAnalysis::EventInfo::Event_PreSelected,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","CoreSq2",200,1.5,4,50,0,100000,ParisAnalysis::EventInfo::Event_Classified,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","CoreSq2",200,1.5,4,50,0,100000,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","MeanScaledShowerGoodness",200,1.5,4,150,-5,10,ParisAnalysis::EventInfo::Event_PreSelected,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","MeanScaledShowerGoodness",200,1.5,4,150,-5,10,ParisAnalysis::EventInfo::Event_Classified,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","MeanScaledShowerGoodness",200,1.5,4,150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_plot("NSBGoodnessUnCorr","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_PreSelected,"","",1);
+add_plot("NSBGoodnessUnCorr","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("NSBGoodnessUnCorr","NSBLikelihood",100,-5,60,60,-10,2,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_plot("ShowerNSBLikelihood",50,-500,0,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("ShowerNSBLikelihood",50,-500,0,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("ShowerNSBLikelihood",50,-500,0,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledShowerUniformNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("MeanScaledShowerUniformNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledShowerUniformNSBLikelihood",1000,-500,500,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("NSBLikelihood","ShowerNSBLikelihood",60,-10,2,50,-500,0,ParisAnalysis::EventInfo::Event_PreSelected,"","",1);
+add_plot("NSBLikelihood","ShowerNSBLikelihood",60,-10,2,50,-500,0,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("NSBLikelihood","ShowerNSBLikelihood",60,-10,2,50,-500,0,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_plot("LogEnergy","DirectionError",50,-2,3,200,0,0.6,ParisAnalysis::EventInfo::Event_PreSelected,"","",1);
+add_plot("LogEnergy","DirectionError",50,-2,3,200,0,0.6,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("LogEnergy","DirectionError",50,-2,3,200,0,0.6,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_plot("DirectionError",100,0,0.2,ParisAnalysis::EventInfo::Event_PreSelected,"",1);
+add_plot("DirectionError",100,0,0.2,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("DirectionError",100,0,0.2,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledModelShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledModelShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_plot("MeanScaledDiffShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"",1);
+add_plot("MeanScaledDiffShowerGoodness",150,-5,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"",1);
+add_telescope_plot("TelLogModelCharge",100,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogModelCharge",100,1.5,4,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogShowerModelCharge",100,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogShowerModelCharge",100,1.5,4,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelDeltaCoGR",100,0,2,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelDeltaCoGR",100,0,2,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelDeltaCoGR",100,0,2,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove2PE",100,0,100,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove2PE",100,0,100,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove2PE",100,0,100,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove3PE",100,0,100,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove3PE",100,0,100,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove3PE",100,0,100,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove4PE",100,0,100,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove4PE",100,0,100,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove4PE",100,0,100,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove5PE",100,0,100,ParisAnalysis::EventInfo::Event_Reconstructed,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove5PE",100,0,100,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove5PE",100,0,100,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove5PE",100,0,100,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove10PE",100,0,100,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove10PE",100,0,100,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNPixelsAbove10PE",100,0,100,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_sky_plot("NSBLikelihood",ParisAnalysis::EventInfo::Event_Classified,"");
+add_sky_plot("NSBLikelihood",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_sky_plot("DirectionError",ParisAnalysis::EventInfo::Event_Classified,"");
+add_sky_plot("DirectionError",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_sky_plot("MeanScaledShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_sky_plot("MeanScaledShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_sky_plot("MeanScaledModelShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_sky_plot("MeanScaledModelShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("NSBLikelihood",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("NSBLikelihood",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("ShowerNSBLikelihood",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("ShowerNSBLikelihood",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("DirectionError",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("DirectionError",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("MeanScaledShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("MeanScaledShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("MeanScaledModelShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("MeanScaledModelShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("MeanScaledBackgroundGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("MeanScaledBackgroundGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("MeanScaledPedestalGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("MeanScaledPedestalGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("ShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("ShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("ModelShowerGoodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("ModelShowerGoodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("Goodness",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("Goodness",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("LogEnergy",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("LogEnergy",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("PrimaryDepth",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("PrimaryDepth",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_fov_plot("AbsoluteEfficiency",ParisAnalysis::EventInfo::Event_Classified,"");
+add_fov_plot("AbsoluteEfficiency",ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_plot("MeanScaledShowerGoodness","MeanScaledModelShowerGoodness",150,-5,10,150,-5,10,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGX",ParisAnalysis::EventInfo::Event_PreSelected,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGY",ParisAnalysis::EventInfo::Event_PreSelected,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGX",ParisAnalysis::EventInfo::Event_Classified,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGY",ParisAnalysis::EventInfo::Event_Classified,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGX",ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaTelCoGY",ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGR",ParisAnalysis::EventInfo::Event_PreSelected,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGPhi",ParisAnalysis::EventInfo::Event_PreSelected,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGR",ParisAnalysis::EventInfo::Event_Classified,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGPhi",ParisAnalysis::EventInfo::Event_Classified,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGR",ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_telescope_scaled_plot("TelCoGX","TelCoGY","TelDeltaCOGPhi",ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","","",ParisAnalysis::EventInfo::Tel_Selected,0);
+add_tel_id_plot(ParisAnalysis::EventInfo::Event_Triggered);
+add_tel_id_plot(ParisAnalysis::EventInfo::Event_Reconstructed);
+add_tel_id_plot(ParisAnalysis::EventInfo::Event_PreSelected);
+add_tel_id_plot(ParisAnalysis::EventInfo::Event_Classified);
+add_tel_id_plot(ParisAnalysis::EventInfo::Event_GammaCandidate);
+add_hammeraitoff_equatorial_plot(ParisAnalysis::EventInfo::Event_Triggered,"");
+add_hammeraitoff_equatorial_plot(ParisAnalysis::EventInfo::Event_Reconstructed,"");
+add_hammeraitoff_equatorial_plot(ParisAnalysis::EventInfo::Event_PreSelected,"");
+add_hammeraitoff_equatorial_plot(ParisAnalysis::EventInfo::Event_Classified,"");
+add_hammeraitoff_equatorial_plot(ParisAnalysis::EventInfo::Event_GammaCandidate,"");
+add_plot("MagneticFieldShowerDistance",180,0,180,ParisAnalysis::EventInfo::Event_Classified,"",0);
+add_plot("MagneticFieldShowerDistance",180,0,180,ParisAnalysis::EventInfo::Event_GammaCandidate,"",0);
+add_plot("MagneticFieldObservationDistance",180,0,180,ParisAnalysis::EventInfo::Event_Classified,"",0);
+add_plot("MagneticFieldObservationDistance",180,0,180,ParisAnalysis::EventInfo::Event_GammaCandidate,"",0);
+add_plot("MagneticFieldAzimut",180,0,180,ParisAnalysis::EventInfo::Event_Classified,"",0);
+add_plot("MagneticFieldAzimut",180,0,180,ParisAnalysis::EventInfo::Event_GammaCandidate,"",0);
+add_plot("MagneticFieldObservationDistance","MagneticFieldAzimut",18,0,180,180,0,180,ParisAnalysis::EventInfo::Event_Classified,"","",0);
+add_plot("MagneticFieldObservationDistance","MagneticFieldAzimut",18,0,180,180,0,180,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",0);
+add_plot("MagneticFieldAzimut","DirectionError",18,0,180,50,0,0.1,ParisAnalysis::EventInfo::Event_Classified,"","",0);
+add_plot("MagneticFieldAzimut","DirectionError",18,0,180,50,0,0.1,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",0);
+add_plot("TruePrimaryDepth","PrimaryDepth",60,-2,10,60,-2,10,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("TruePrimaryDepth","PrimaryDepth",60,-2,10,60,-2,10,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_plot("TrueLogEnergy","LogEnergy",50,-2,3,50,-2,3,ParisAnalysis::EventInfo::Event_Classified,"","",1);
+add_plot("TrueLogEnergy","LogEnergy",50,-2,3,50,-2,3,ParisAnalysis::EventInfo::Event_GammaCandidate,"","",1);
+add_telescope_plot("TelLogCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_Reconstructed,false,"",ParisAnalysis::EventInfo::Tel_WData,1);
+add_telescope_plot("TelLogCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelNominalDistance",50,0,2.5,ParisAnalysis::EventInfo::Event_Reconstructed,false,"",ParisAnalysis::EventInfo::Tel_WData,1);
+add_telescope_plot("TelNominalDistance",50,0,2.5,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogShowerCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_PreSelected,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogShowerCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogShowerCharge",200,1.5,4,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelShowerCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelShowerCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelBackgroundCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_Classified,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelBackgroundCharge",200,-100,1000,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","TelLogShowerCharge",200,1.5,4,200,1.5,4,ParisAnalysis::EventInfo::Event_Classified,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+add_telescope_plot("TelLogCharge","TelLogShowerCharge",200,1.5,4,200,1.5,4,ParisAnalysis::EventInfo::Event_GammaCandidate,false,"","",ParisAnalysis::EventInfo::Tel_Selected,1);
+//===================
+// = Maps = 
+set_mapextension(2,2);
+set_mapbinsize(0.02);
+set_oversampling_size(0.1);
+generate_acceptance_model(true);
+generate_sky_acceptance(true);
+set_acceptance_type(ParisAnalysis::AcceptanceInfo::Acceptance_TwoD);
+use_zenithdependant_acceptance(true);
+use_ring_backgroundmap(true,true,true);
+use_adaptivering_backgroundmap(false);
+use_template_background(true);
+use_sandwich_backgroundmap(false);
+use_onoff_backgroundmap(false);
+use_acceptance_gradient_correction(true);
+set_gradient_correction_max_angle(2);
+set_gradient_correction_max_gradient(0.1);
+//===================
+// = Substractions = 
+set_histotheta2max(0.1);
+set_histotheta2nbins(60);
+use_ring_background(true);
+use_full_background(false);
+use_gamma_fov_storage(false,false);
+use_multipleoff_background(true);
+multipleoff_background_optimize_regions(false);
+multipleoff_background_normalizefullhisto(false);
+multipleoff_background_exclude_onoff(true);
+multipleoff_set_n_offregions(-1);
+multipleoff_use_acceptance_gradient(true);
+use_onoff_background(false);
+//===================
+// = Separation 
+add_classification("ModelHESSI","MeanScaledShowerGoodness",ParisAnalysis::EventInfo::EventBit_GammaLike,-4,0.6);
+add_classification("ModelHESSI","MeanScaledShowerGoodness",ParisAnalysis::EventInfo::EventBit_BackgroundLike,2,999);
+add_rejection("ModelHESSI","PrimaryDepth",-1.1,4.4);
+add_rejection("ModelHESSI","NSBGoodness",40,99999);
+add_rejection("ModelHESSI","DirectionError",0,0.2);
+run_sliced_analysis(slice_size,slice,slice);
+gApplication->Terminate(0);
+}
+EOF
+$SINGULARITYCMD root -b 'make_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_sliced.C(1,5)'
+ls -la *.root
+mkdir -p /home/jshapopi/Tests/.
+for file in ./Results_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_slice*.root; do
+    cp -v ./$file /home/jshapopi/Tests/./$file
+done
+mkdir -p /home/jshapopi/Tests/.
+for file in ./EventsList_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list_*.root; do
+    cp -v ./$file /home/jshapopi/Tests/./$file
+done
+mkdir -p /home/jshapopi/Tests/.
+for file in ./TMVA_Cen_A_ModelPlus_HESSI_Stereo_Faint_Cen_A_Dot_list*.root; do
+    cp -v ./$file /home/jshapopi/Tests/./$file
+done

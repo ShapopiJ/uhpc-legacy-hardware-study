@@ -1,0 +1,32 @@
+#!/bin/bash
+#PBS -N thread_pinning_sa
+#PBS -q stampede
+#PBS -l select=1:ncpus=16
+#PBS -l walltime=00:20:00
+#PBS -j oe
+
+# Follow-up to job_thread_pinning.pbs: that run showed OMP_PLACES=cores
+# packs threads onto consecutive cores (all of socket 0 first), which
+# starves partial-node jobs of the second socket's memory controller and
+# makes naive pinning *worse* than doing nothing. This job adds a
+# socket-aware pinning policy (OMP_PLACES=sockets) that explicitly spreads
+# threads across both NUMA nodes, to test whether NUMA-aware pinning
+# recovers (or beats) the unpinned bandwidth.
+
+cd "$PBS_O_WORKDIR"
+BIN=../scripts/stream_triad
+N=200000000
+ITERS=5
+REPS=10
+OUT="thread_pinning_socketaware_$(date +%Y%m%d_%H%M%S).csv"
+
+echo "host,threads,mode,rep,bandwidth_GBps" > "$OUT"
+
+for threads in 2 4 8; do
+    for rep in $(seq 1 $REPS); do
+        bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=true OMP_PLACES=sockets "$BIN" $N $ITERS)
+        echo "$(hostname),$threads,pinned_socketaware,$rep,$bw" >> "$OUT"
+    done
+done
+
+echo "wrote $OUT"
