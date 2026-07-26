@@ -1,0 +1,76 @@
+#!/bin/bash
+#PBS -N hpl_blas_cmp
+#PBS -l nodes=SP1-00:ppn=16
+#PBS -l mem=31gb
+#PBS -j oe
+
+# Paired ATLAS-vs-OpenBLAS HPL on ONE Stampede node, same N=58912, NB=224.
+#  ATLAS   : reproduces the published facility config (8 MPI ranks, threaded
+#            libtatlas -> 2 threads/rank = 16 cores). This is the setup that
+#            produced the ~150.7 GF/node ATLAS numbers in Linux_PII_CBLAS_gm2.
+#  OpenBLAS: Sandy-Bridge-tuned, sequential, standard 16-MPI-rank HPL config.
+# Both use every core of the node; only the BLAS library differs.
+
+module load gnu8 openmpi3 2>/dev/null || true
+BASE=/home/jshapopi/blas-study
+ATLAS_XHPL=/home/jshapopi/Projects/benchmark/hpl-2.1/bin/Linux_PII_CBLAS_gm.backup/xhpl.backup
+OB_XHPL=$BASE/hpl-2.3/bin/SANDYBRIDGE_OB/xhpl
+
+echo "host=$(hostname)  date=$(date)  governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
+
+# --- HPL.dat: ATLAS (P=2 Q=4 -> 8 ranks) ---
+mkdir -p $BASE/run_atlas $BASE/run_ob
+gen_dat () {  # $1=P $2=Q  -> stdout HPL.dat
+cat <<EOF
+HPLinpack benchmark input file
+ICL, UTK
+HPL.out      output file name
+6            device out (6=stdout)
+1            # of problems sizes (N)
+58912        Ns
+1            # of NBs
+224          NBs
+0            PMAP process mapping (0=Row-,1=Column-major)
+1            # of process grids (P x Q)
+$1            Ps
+$2            Qs
+16.0         threshold
+1            # of panel fact
+2            PFACTs (0=left, 1=Crout, 2=Right)
+1            # of recursive stopping criterium
+4            NBMINs (>= 1)
+1            # of panels in recursion
+2            NDIVs
+1            # of recursive panel fact.
+1            RFACTs (0=left, 1=Crout, 2=Right)
+1            # of broadcast
+1            BCASTs (0=1rg,1=1rM,2=2rg,3=2rM,4=Lng,5=LnM)
+1            # of lookahead depth
+1            DEPTHs (>=0)
+2            SWAP (0=bin-exch,1=long,2=mix)
+64           swapping threshold
+0            L1 in (0=transposed,1=no-transposed) form
+0            U  in (0=transposed,1=no-transposed) form
+1            Equilibration (0=no,1=yes)
+8            memory alignment in double (> 0)
+EOF
+}
+
+cd $BASE/run_atlas; gen_dat 2 4 > HPL.dat
+echo ">>> RUN 1 ATLAS (8 ranks, threaded)  $(date)"
+mpirun -np 8 "$ATLAS_XHPL" > atlas.out 2>&1; rc=$?
+echo "ATLAS rc=$rc"; grep -E "^W" atlas.out | tail -1
+
+cd $BASE/run_ob; gen_dat 2 8 > HPL.dat
+export OMP_NUM_THREADS=1
+echo ">>> RUN 2 OpenBLAS (16 ranks, sequential)  $(date)"
+mpirun -np 16 "$OB_XHPL" > ob.out 2>&1; rc=$?
+echo "OpenBLAS rc=$rc"; grep -E "^W" ob.out | tail -1
+
+A=$(grep -E "^W" $BASE/run_atlas/atlas.out | tail -1 | awk "{print \$7}")
+O=$(grep -E "^W" $BASE/run_ob/ob.out | tail -1 | awk "{print \$7}")
+echo "=================================================="
+echo "ATLAS    = $A GFLOPS  (eff = $(awk "BEGIN{printf \"%.1f\", 100*$A/345.6}")% of 345.6 peak)"
+echo "OpenBLAS = $O GFLOPS  (eff = $(awk "BEGIN{printf \"%.1f\", 100*$O/345.6}")% of 345.6 peak)"
+echo "speedup  = $(awk "BEGIN{printf \"%.2f\", $O/$A}")x"
+echo "DONE $(date)"

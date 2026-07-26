@@ -1,0 +1,38 @@
+#!/bin/bash
+#PBS -N pin_spread_close
+#PBS -l nodes=SP1-01:ppn=16
+#PBS -j oe
+
+# Adds the standard OpenMP-4 affinity vocabulary (OMP_PROC_BIND=spread|close)
+# to the pinning sweep, on ONE node so all policies are directly comparable:
+#   unpinned : OMP_PROC_BIND=false                      (PBS default)
+#   close    : OMP_PROC_BIND=close  OMP_PLACES=cores    (= naive core-packing)
+#   spread   : OMP_PROC_BIND=spread OMP_PLACES=cores    (documented NUMA answer)
+# STREAM-Triad bandwidth, arrays >> L3, {1,2,4,8,16} threads, 10 reps each.
+
+cd /home/jshapopi/threadpinning/scripts
+BIN=./stream_triad
+N=200000000
+ITERS=5
+REPS=10
+OUT="/home/jshapopi/threadpinning/results/pinning_spread_close_$(date +%Y%m%d_%H%M%S).csv"
+
+echo "host=$(hostname) governor=$(cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor)"
+echo "host,threads,mode,rep,bandwidth_GBps" > "$OUT"
+
+for threads in 1 2 4 8 16; do
+  for rep in $(seq 1 $REPS); do
+    bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=false "$BIN" $N $ITERS)
+    echo "$(hostname),$threads,unpinned,$rep,$bw" >> "$OUT"
+  done
+  for rep in $(seq 1 $REPS); do
+    bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=close OMP_PLACES=cores "$BIN" $N $ITERS)
+    echo "$(hostname),$threads,close,$rep,$bw" >> "$OUT"
+  done
+  for rep in $(seq 1 $REPS); do
+    bw=$(OMP_NUM_THREADS=$threads OMP_PROC_BIND=spread OMP_PLACES=cores "$BIN" $N $ITERS)
+    echo "$(hostname),$threads,spread,$rep,$bw" >> "$OUT"
+  done
+done
+echo "wrote $OUT"
+tail -n +1 "$OUT" | awk -F, 'NR>1{s[$2"-"$3]+=$5; n[$2"-"$3]++} END{for(k in s) printf "%s  mean=%.2f GB/s\n", k, s[k]/n[k]}' | sort
