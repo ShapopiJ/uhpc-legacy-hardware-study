@@ -24,8 +24,10 @@ HPC cluster built from repurposed *Ranger* and *Stampede* hardware.
   confound. `results/` holds the four per-condition job logs and `timing_summary.csv`. The
   repeated, counterbalanced 2×2 campaign (4 reps × 4 conditions) that places a confidence
   interval on the governor effect is driven by `scripts/gammapy_campaign.sh` (with the
-  privileged one-time helper `scripts/setup_gammapy_sudo.sh`); its `campaign_*/timing.csv` is
-  added once the run completes.
+  privileged one-time helper `scripts/setup_gammapy_sudo.sh`). Result: **`CAMPAIGN_SUMMARY.md`**
+  and `results/campaign_timing.csv` — the governor effect on this real, mixed workload is small
+  (1.5 %) and not statistically significant (95 % CI spans zero), sharpening rather than
+  contradicting the OS-jitter variance result.
 - **`BlasTuning/`** — the ATLAS-vs-OpenBLAS HPL comparison on the *Stampede* rack (the study's
   headline result: 45.8 % → 85.3 % of peak, 1.86×, from a library swap alone). Build script,
   PBS runner, raw HPL output, and `SUMMARY.md` with the full reproduction recipe.

@@ -40,7 +40,8 @@ for idx in "${!ORDER[@]}"; do
   # --- collect timing from job output ---
   OUT=$(ls -t "$BENCH"/GPY_bench.o${JID}* 2>/dev/null | head -1)
   if [ -z "$OUT" ] || [ ! -f "$OUT" ]; then log "  ERROR: no output file for $JID"; continue; fi
-  SECS=$(awk '/^BENCH_START/{s=$4} /^BENCH_END/{e=$4} END{ if(s&&e) printf "%.1f", e-s }' "$OUT")
+  # epoch is the LAST field of the BENCH_START/END lines ("BENCH_START <iso> <epoch>")
+  SECS=$(awk '/^BENCH_START/{s=$NF} /^BENCH_END/{e=$NF} END{ if(s&&e) printf "%.1f", e-s }' "$OUT")
   GOV=$(awk -F'[= ]' '/^governor=/{print $2; exit}' "$OUT")
   RDMA=$(awk -F'[= ]' '/rdma-ndd=/{for(i=1;i<=NF;i++) if($i ~ /rdma-ndd/){print $(i+1); exit}}' "$OUT")
   PYRC=$(awk -F'=' '/^python_exit=/{print $2; exit}' "$OUT")

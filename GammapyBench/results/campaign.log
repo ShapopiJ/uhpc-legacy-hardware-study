@@ -1,0 +1,85 @@
+[2026-07-26 20:52:00] campaign start: 16 runs, output /home/jshapopi/Projects/GammapyBench/campaign_20260726_205200
+[2026-07-26 20:52:00] run 1/16 (round 1) condition A
+[2026-07-26 20:52:02]   setcond: condition A set: governor=ondemand rdma-ndd=active
+[2026-07-26 20:52:05]   submitted job 23710; waiting...
+[2026-07-26 22:18:07]   DONE A: s (governor=ondemand rdma=active python_exit=0)
+[2026-07-26 22:18:07] run 2/16 (round 1) condition B
+[2026-07-26 22:18:10]   setcond: condition B set: governor=ondemand rdma-ndd=inactive
+[2026-07-26 22:18:13]   submitted job 23711; waiting...
+[2026-07-26 23:43:15]   DONE B: s (governor=ondemand rdma=inactive python_exit=0)
+[2026-07-26 23:43:15] run 3/16 (round 1) condition C
+[2026-07-26 23:43:18]   setcond: condition C set: governor=performance rdma-ndd=active
+[2026-07-26 23:43:21]   submitted job 23712; waiting...
+[2026-07-27 01:11:23]   DONE C: s (governor=performance rdma=active python_exit=0)
+[2026-07-27 01:11:23] run 4/16 (round 1) condition D
+[2026-07-27 01:11:25]   setcond: condition D set: governor=performance rdma-ndd=inactive
+[2026-07-27 01:11:28]   submitted job 23713; waiting...
+[2026-07-27 02:34:30]   DONE D: s (governor=performance rdma=inactive python_exit=0)
+[2026-07-27 02:34:30] run 5/16 (round 2) condition B
+[2026-07-27 02:34:33]   setcond: condition B set: governor=ondemand rdma-ndd=inactive
+[2026-07-27 02:34:36]   submitted job 23714; waiting...
+[2026-07-27 04:04:37]   DONE B: s (governor=ondemand rdma=inactive python_exit=0)
+[2026-07-27 04:04:37] run 6/16 (round 2) condition D
+[2026-07-27 04:04:40]   setcond: condition D set: governor=performance rdma-ndd=inactive
+[2026-07-27 04:04:44]   submitted job 23715; waiting...
+[2026-07-27 05:29:45]   DONE D: s (governor=performance rdma=inactive python_exit=0)
+[2026-07-27 05:29:45] run 7/16 (round 2) condition A
+[2026-07-27 05:29:48]   setcond: condition A set: governor=ondemand rdma-ndd=active
+[2026-07-27 05:29:51]   submitted job 23716; waiting...
+[2026-07-27 06:55:52]   DONE A: s (governor=ondemand rdma=active python_exit=0)
+[2026-07-27 06:55:52] run 8/16 (round 2) condition C
+[2026-07-27 06:55:56]   setcond: condition C set: governor=performance rdma-ndd=active
+[2026-07-27 06:55:59]   submitted job 23717; waiting...
+[2026-07-27 08:19:00]   DONE C: s (governor=performance rdma=active python_exit=0)
+[2026-07-27 08:19:00] run 9/16 (round 3) condition C
+[2026-07-27 08:19:03]   setcond: condition C set: governor=performance rdma-ndd=active
+[2026-07-27 08:19:06]   submitted job 23718; waiting...
+[2026-07-27 09:45:07]   DONE C: s (governor=performance rdma=active python_exit=0)
+[2026-07-27 09:45:07] run 10/16 (round 3) condition A
+[2026-07-27 09:45:10]   setcond: condition A set: governor=ondemand rdma-ndd=active
+[2026-07-27 09:45:13]   submitted job 23719; waiting...
+[2026-07-27 11:12:15]   DONE A: s (governor=ondemand rdma=active python_exit=0)
+[2026-07-27 11:12:15] run 11/16 (round 3) condition D
+[2026-07-27 11:12:18]   setcond: condition D set: governor=performance rdma-ndd=inactive
+[2026-07-27 11:12:21]   submitted job 23720; waiting...
+[2026-07-27 12:35:22]   DONE D: s (governor=performance rdma=inactive python_exit=0)
+[2026-07-27 12:35:22] run 12/16 (round 3) condition B
+[2026-07-27 12:35:25]   setcond: condition B set: governor=ondemand rdma-ndd=inactive
+[2026-07-27 12:35:28]   submitted job 23721; waiting...
+[2026-07-27 13:59:30]   DONE B: s (governor=ondemand rdma=inactive python_exit=0)
+[2026-07-27 13:59:30] run 13/16 (round 4) condition D
+[2026-07-27 13:59:33]   setcond: condition D set: governor=performance rdma-ndd=inactive
+[2026-07-27 13:59:36]   submitted job 23722; waiting...
+[2026-07-27 15:24:37]   DONE D: s (governor=performance rdma=inactive python_exit=0)
+[2026-07-27 15:24:37] run 14/16 (round 4) condition C
+[2026-07-27 15:24:40]   setcond: condition C set: governor=performance rdma-ndd=active
+[2026-07-27 15:24:43]   submitted job 23723; waiting...
+[2026-07-27 16:47:45]   DONE C: s (governor=performance rdma=active python_exit=0)
+[2026-07-27 16:47:45] run 15/16 (round 4) condition B
+[2026-07-27 16:47:47]   setcond: condition B set: governor=ondemand rdma-ndd=inactive
+[2026-07-27 16:47:50]   submitted job 23724; waiting...
+[2026-07-27 18:12:52]   DONE B: s (governor=ondemand rdma=inactive python_exit=0)
+[2026-07-27 18:12:52] run 16/16 (round 4) condition A
+[2026-07-27 18:12:55]   setcond: condition A set: governor=ondemand rdma-ndd=active
+[2026-07-27 18:12:58]   submitted job 23725; waiting...
+[2026-07-27 19:37:00]   DONE A: s (governor=ondemand rdma=active python_exit=0)
+[2026-07-27 19:37:00] campaign complete. Summary:
+run,round,condition,job_id,governor,rdma,bench_seconds,python_exit
+1,1,A,23710,ondemand,active,,0
+2,1,B,23711,ondemand,inactive,,0
+3,1,C,23712,performance,active,,0
+4,1,D,23713,performance,inactive,,0
+5,2,B,23714,ondemand,inactive,,0
+6,2,D,23715,performance,inactive,,0
+7,2,A,23716,ondemand,active,,0
+8,2,C,23717,performance,active,,0
+9,3,C,23718,performance,active,,0
+10,3,A,23719,ondemand,active,,0
+11,3,D,23720,performance,inactive,,0
+12,3,B,23721,ondemand,inactive,,0
+13,4,D,23722,performance,inactive,,0
+14,4,C,23723,performance,active,,0
+15,4,B,23724,ondemand,inactive,,0
+16,4,A,23725,ondemand,active,,0
+  ondemand mean = 0.0 s (n=8)
+  performance mean = 0.0 s (n=8)

@@ -1,0 +1,17 @@
+run,round,condition,job_id,governor,rdma,bench_seconds,python_exit
+1,1,A,23710,ondemand,active,5119.5,0
+2,1,B,23711,ondemand,inactive,5032.5,0
+3,1,C,23712,performance,active,5209.6,0
+4,1,D,23713,performance,inactive,4924.2,0
+5,2,B,23714,ondemand,inactive,5342.6,0
+6,2,D,23715,performance,inactive,5049.3,0
+7,2,A,23716,ondemand,active,5131.8,0
+8,2,C,23717,performance,active,4952.4,0
+9,3,C,23718,performance,active,5085.9,0
+10,3,A,23719,ondemand,active,5131.7,0
+11,3,D,23720,performance,inactive,4936.2,0
+12,3,B,23721,ondemand,inactive,4973.3,0
+13,4,D,23722,performance,inactive,5041.1,0
+14,4,C,23723,performance,active,4955.0,0
+15,4,B,23724,ondemand,inactive,5021.2,0
+16,4,A,23725,ondemand,active,5001.4,0
